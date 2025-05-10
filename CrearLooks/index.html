@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Crear Looks</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <script src="jscolor.js"></script>
+  <h1>¡Crea tu Look!</h1>
+  <div class="content">
+  <div class="contenedor-personaje">
+    <img src="../img/mona.jpg" class="capa" id="base">
+    <img class="capa" id="infer">
+    <img class="capa" id="super">
+    <img class="capa" id="superUp">
+    <canvas id="canvasPersonaje" class="capa" width="300" height="300"></canvas>
+    <input type="text" id="text" placeholder="Digita Pegatina y click lugar">
+  </div>
+  <div class="opciones">
+    <div class="grupV">
+      <button type="button" onclick="deletesup()">Delete</button>
+      <button type="button" onclick="cambiarSuperior(1)">Add</button>
+      <canvas id="canvas1" width="270" height="270"></canvas>
+      <canvas id="canvas1B" width="300" height="300" hidden></canvas>
+      <img id="ropa1" src="../img/playera.png" hidden>
+      <input data-jscolor="{}" value="#FFA4F5" onblur ="colorImg(1)" id="color1">
+    </div>
+    <div class="grupV">
+      <button type="button" onclick="deleteinf()">Delete</button>
+      <button type="button" onclick="cambiarInferior(2)">Add</button>
+      <canvas id="canvas2" width="270" height="270"></canvas>
+      <canvas id="canvas2B" width="300" height="300" hidden></canvas>
+      <img id="ropa2" src="../img/pantalon.png" hidden>
+      <input data-jscolor="{}" value="#7EC7FF" onblur ="colorImg(2)" id="color2">
+    </div>
+    <div class="grupV">
+      <button type="button" onclick="deletesupUp()">Delete</button>
+      <button type="button" onclick="cambiarSuperiorUp(3)">Add</button>
+      <canvas id="canvas3" width="270" height="270"></canvas>
+      <canvas id="canvas3B" width="300" height="300" hidden></canvas>
+      <img id="ropa3" src="../img/chaqueta.png" hidden>
+      <input data-jscolor="{}" value="#47A4FF" onblur ="colorImg(3)" id="color3">
+    </div>
+  </div>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    const input = document.getElementById('text');
+    const canvas = document.getElementById('canvasPersonaje');
+    const ctx = canvas.getContext('2d');
+    ctx.font = "10px Verdana";
+    ctx.fillStyle = "black";
+
+    canvas.addEventListener("click", function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const texto = input.value || "";
+      ctx.fillText(texto, x, y);
+    });
+    //--------------------------------------------------------
+    let shirt2 = document.getElementById('ropa2');
+    let canvas2 = document.getElementById('canvas2');
+    let ctx2 = canvas2.getContext('2d');
+    ctx2.drawImage(shirt2, -canvas2.width * 0.5, -canvas2.height *0.9, canvas2.width *2, canvas2.height *2);
+    shirt2.onload = ()=> {
+      ctx2.drawImage(shirt2, -canvas2.width * 0.5, -canvas2.height *0.9, canvas2.width *2, canvas2.height *2);
+    }
+    let shirt3 = document.getElementById('ropa3');
+    let canvas3 = document.getElementById('canvas3');
+    let ctx3 = canvas3.getContext('2d');
+    ctx3.drawImage(shirt3, -canvas3.width * 0.5, -canvas3.height * 0.5, canvas3.width *2, canvas3.height *2);
+    shirt3.onload = ()=> {
+      ctx3.drawImage(shirt3, -canvas3.width * 0.5, -canvas3.height * 0.5, canvas3.width *2, canvas3.height *2);
+    }
+    let shirt1 = document.getElementById('ropa1');
+    let canvas1 = document.getElementById('canvas1');
+    let ctx1 = canvas1.getContext('2d');
+    ctx1.drawImage(shirt1, -canvas1.width * 0.5, -canvas1.height * 0.5, canvas1.width *2, canvas1.height *2);
+    shirt1.onload = ()=> {
+      ctx1.drawImage(shirt1, -canvas1.width * 0.5, -canvas1.height * 0.5, canvas1.width *2, canvas1.height *2);
+    }
+    colorImg(1);
+    colorImg(2);
+    colorImg(3);
+function getRGB(hex) {
+  hex = hex.replace('#', '');
+  const bigint = parseInt(hex, 16);
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255
+  };
+}   
+function colorImg(id, type = '') {
+  var shirt = document.getElementById('ropa'+id);
+  var canvas = document.getElementById('canvas'+id);
+  if (type != '') {
+    canvas = document.getElementById('canvas'+id+'B');
+  }
+  const ctx = canvas.getContext('2d');
+  if (type === '') {
+    if (id === 2 ) {
+      ctx.drawImage(shirt, -canvas.width * 0.5, -canvas.height *0.9, canvas.width *2, canvas.height *2);
+    } else {
+      ctx.drawImage(shirt, -canvas.width * 0.5, -canvas.height * 0.5, canvas.width *2, canvas.height *2);
+    }
+  } else {
+    ctx.drawImage(shirt, 0, 0, canvas.width, canvas.height);
+  }
+  const { r: tintR, g: tintG, b: tintB } = getRGB(document.getElementById('color'+id).value);
+
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+
+    if (a > 0) {
+      // Calcular luminancia (brillo) del píxel original
+      const luminancia = (r + g + b) / 3 / 255;
+
+      // Aplicar el tinte respetando sombras
+      data[i] = tintR * luminancia;
+      data[i + 1] = tintG * luminancia;
+      data[i + 2] = tintB * luminancia;
+      data[i + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  if (type === '') {
+    colorImg(id,'B');
+  }
+}
+  </script>
+</body>
+</html>
